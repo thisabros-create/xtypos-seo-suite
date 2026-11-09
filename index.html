@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ΧΤΥΠΟΣ - SEO Assistant & Content Optimization Suite</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <style>
+    :root {
+      --xtypos-red: #d9534f;
+      --xtypos-dark: #222222;
+    }
+    body {
+      background-color: #f4f6f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: #333;
+    }
+    .header-bar {
+      background: var(--xtypos-dark);
+      color: #fff;
+      padding: 15px 0;
+      border-bottom: 4px solid var(--xtypos-red);
+    }
+    .card {
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+    .nav-pills .nav-link.active {
+      background-color: var(--xtypos-red);
+    }
+    .nav-pills .nav-link {
+      color: var(--xtypos-dark);
+      font-weight: 600;
+    }
+    .serp-box {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      font-family: arial, sans-serif;
+    }
+    .serp-title {
+      color: #1a0dab;
+      font-size: 20px;
+      line-height: 1.3;
+      margin-bottom: 2px;
+    }
+    .serp-url {
+      color: #006621;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .serp-desc {
+      color: #545454;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .badge-counter {
+      font-size: 0.8rem;
+      padding: 4px 8px;
+      border-radius: 12px;
+    }
+    .code-output {
+      background: #272822;
+      color: #f8f8f2;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.88rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header-bar mb-4">
+    <div class="container d-flex justify-content-between align-items-center">
+      <div>
+        <h3 class="m-0 fw-bold"><i class="bi bi-newspaper me-2"></i>ΧΤΥΠΟΣ Newsroom SEO Suite</h3>
+        <small class="text-white-50">Εργαλείο Βελτιστοποίησης & Link Architecture | Xtypos.gr</small>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="input-group input-group-sm me-2" style="max-width: 320px;">
+          <span class="input-group-text bg-secondary text-white border-0"><i class="bi bi-key"></i></span>
+          <input type="password" id="apiKeyInput" class="form-control" placeholder="Gemini API Key...">
+          <button type="button" id="saveKeyBtn" class="btn btn-danger" onclick="saveApiKey()">Save</button>
+        </div>
+        <span class="badge bg-danger" id="apiStatusBadge">No Key</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <ul class="nav nav-pills mb-4 bg-white p-2 shadow-sm rounded" id="seoTabs">
+      <li class="nav-item">
+        <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#analyzerTab"><i class="bi bi-cpu me-1"></i> Article Analyzer & AI</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#serpTab"><i class="bi bi-search me-1"></i> SERP Preview</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#linksTab"><i class="bi bi-link-45deg me-1"></i> Link Architecture</button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- TAB 1 -->
+      <div class="tab-pane fade show active" id="analyzerTab">
+        <div class="row">
+          <div class="col-md-7">
+            <div class="card p-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="fw-bold m-0">Κείμενο Άρθρου / Δελτίου Τύπου</h5>
+                <button class="btn btn-sm btn-danger fw-bold" onclick="generateSeoWithAi()"><i class="bi bi-lightning-charge-fill me-1"></i> ⚡ Live AI Auto-Generate</button>
+              </div>
+              <textarea id="articleContent" class="form-control" rows="14" placeholder="Επικολλήστε εδώ το κείμενο του ρεπορτάζ..."></textarea>
+              <div class="d-flex justify-content-between mt-2 text-muted small">
+                <span>Λέξεις: <strong id="wordCount">0</strong></span>
+                <span>Εκτιμώμενος Χρόνος: <strong id="readTime">0</strong> λεπτά</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="card p-3">
+              <h5 class="fw-bold mb-3">Αποτελέσματα AI</h5>
+              <div class="mb-3">
+                <label class="form-label fw-bold">Target Focus Keyword:</label>
+                <input type="text" id="aiFocusKeyword" class="form-control form-control-sm" readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-bold">Search Intent Queries:</label>
+                <ul class="list-group list-group-flush border rounded" id="aiQueriesList">
+                  <li class="list-group-item text-muted small">Πατήστε «Live AI Auto-Generate»...</li>
+                </ul>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-bold">CMS Tags:</label>
+                <input type="text" id="aiTags" class="form-control form-control-sm" readonly>
+              </div>
+              <div class="mb-2">
+                <label class="form-label fw-bold">Greeklish URL Slug:</label>
+                <div class="input-group input-group-sm">
+                  <input type="text" id="aiSlug" class="form-control" readonly>
+                  <button class="btn btn-outline-secondary" onclick="copyToClipboard('aiSlug')">Copy</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2 -->
+      <div class="tab-pane fade" id="serpTab">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card p-3">
+              <h5 class="fw-bold mb-3">Στοιχεία Meta</h5>
+              <div class="mb-3">
+                <div class="d-flex justify-content-between">
+                  <label class="form-label fw-bold">SEO Title</label>
+                  <span id="titleCounter" class="badge bg-secondary badge-counter">0 / 60 char</span>
+                </div>
+                <input type="text" id="metaTitleInput" class="form-control" oninput="updateSerp()">
+              </div>
+              <div class="mb-3">
+                <div class="d-flex justify-content-between">
+                  <label class="form-label fw-bold">Meta Description</label>
+                  <span id="descCounter" class="badge bg-secondary badge-counter">0 / 155 char</span>
+                </div>
+                <textarea id="metaDescInput" class="form-control" rows="3" oninput="updateSerp()"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card p-3">
+              <h5 class="fw-bold mb-3">Google Snippet Preview</h5>
+              <div class="serp-box">
+                <div class="serp-url">https://www.xtypos.gr › <span id="serpSlugPreview">arthro</span></div>
+                <div class="serp-title" id="serpTitlePreview">Τίτλος Άρθρου</div>
+                <div class="serp-desc" id="serpDescPreview">Περιγραφή άρθρου...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3 -->
+      <div class="tab-pane fade" id="linksTab">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card p-3">
+              <h5 class="fw-bold mb-2">Contextual Internal Links (xtypos.gr)</h5>
+              <div id="internalLinksBox" class="list-group mb-3"></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card p-3">
+              <h5 class="fw-bold mb-2">High-Authority External Links (.gov.gr)</h5>
+              <div id="externalLinksBox" class="list-group mb-3"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card p-3 mt-3">
+          <h5 class="fw-bold mb-2">Έτοιμο HTML Box «Διαβάστε Επίσης»</h5>
+          <div class="code-output mb-2" id="htmlReadAlsoBox"></div>
+          <div>
+            <button class="btn btn-sm btn-dark" onclick="copyCodeOutput('htmlReadAlsoBox')"><i class="bi bi-clipboard me-1"></i> Αντιγραφή HTML</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
